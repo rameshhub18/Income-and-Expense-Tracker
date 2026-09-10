@@ -1,0 +1,189 @@
+﻿{% extends "base.html" %}
+{% block title %}Reports — Dhan Flow{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='reports.css') }}" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block body %}
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar__header">
+    <a href="/" class="sidebar__logo">
+      <i class="ri-line-chart-fill"></i><span>Dhan Flow</span>
+    </a>
+    <button class="sidebar__close" id="sidebarClose" aria-label="Close sidebar">
+      <i class="ri-close-line"></i>
+    </button>
+  </div>
+  <nav class="sidebar__nav">
+    <a href="{{ url_for('dashboard.dashboard') }}"             class="sidebar__link"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
+    <a href="{{ url_for('dashboard.dashboard') }}?add=income"  class="sidebar__link"><i class="ri-add-circle-line"></i><span>Add Income</span></a>
+    <a href="{{ url_for('dashboard.dashboard') }}?add=expense" class="sidebar__link"><i class="ri-subtract-line"></i><span>Add Expense</span></a>
+    <a href="{{ url_for('categories.categories_page') }}"       class="sidebar__link"><i class="ri-price-tag-3-line"></i><span>Categories</span></a>
+    <a href="{{ url_for('budget.budget_page') }}"               class="sidebar__link"><i class="ri-wallet-3-line"></i><span>Budget</span></a>
+    <a href="{{ url_for('reports.reports_page') }}"             class="sidebar__link active"><i class="ri-bar-chart-2-line"></i><span>Reports</span></a>
+    <a href="{{ url_for('notifications.notifications_page') }}" class="sidebar__link"><i class="ri-notification-3-line"></i><span>Notifications</span></a>
+    <a href="{{ url_for('backup.backup_page') }}"               class="sidebar__link"><i class="ri-database-2-line"></i><span>Backup</span></a>
+    <a href="{{ url_for('reset.reset_page') }}"                class="sidebar__link"><i class="ri-refresh-line"></i><span>Reset</span></a>
+  </nav>
+  <div class="sidebar__footer">
+    <a href="{{ url_for('auth.logout') }}" class="sidebar__link sidebar__link--logout">
+      <i class="ri-logout-box-r-line"></i><span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ===== MAIN ===== -->
+<div class="dash-main" id="dashMain">
+
+  <header class="dash-navbar">
+    <div class="dash-navbar__left">
+      <button class="hamburger" id="hamburger" aria-label="Toggle sidebar"><i class="ri-menu-line"></i></button>
+      <h1 class="dash-navbar__title">Reports</h1>
+    </div>
+    <div class="dash-navbar__right">
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+        <i class="ri-moon-line" id="themeIcon"></i>
+      </button>
+      <div class="dash-user">
+        <div class="dash-user__avatar">{{ user_name[0]|upper }}</div>
+        <span class="dash-user__name">Welcome, {{ user_name }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="dash-content">
+
+    <!-- ── Period selector ── -->
+    <div class="reports-toolbar">
+      <div class="reports-toolbar__left">
+        <i class="ri-calendar-line"></i>
+        <select id="periodSelect">
+          <option value="7d"   {% if period=='7d'   %}selected{% endif %}>Last 7 Days</option>
+          <option value="30d"  {% if period=='30d'  %}selected{% endif %}>Last 30 Days</option>
+          <option value="90d"  {% if period=='90d'  %}selected{% endif %}>Last 90 Days</option>
+          <option value="12m"  {% if period=='12m'  %}selected{% endif %}>Last 12 Months</option>
+          <option value="ytd"  {% if period=='ytd'  %}selected{% endif %}>Year to Date</option>
+          <option value="custom" {% if period=='custom' %}selected{% endif %}>Custom Range</option>
+        </select>
+        <div id="customRange" style="display:{% if period=='custom' %}flex{% else %}none{% endif %};gap:.5rem;align-items:center">
+          <input type="date" id="customFrom" value="{{ custom_from }}" />
+          <span>to</span>
+          <input type="date" id="customTo" value="{{ custom_to }}" />
+          <button class="btn btn--primary btn--sm" id="applyCustom">Apply</button>
+        </div>
+      </div>
+      <div class="reports-toolbar__right">
+        <span class="date-range-label">{{ date_from.strftime('%b %d, %Y') }} — {{ date_to.strftime('%b %d, %Y') }}</span>
+        <a href="/api/reports/export?period={{ period }}&from={{ custom_from }}&to={{ custom_to }}"
+           class="btn btn--outline btn--sm">
+          <i class="ri-download-line"></i> Export CSV
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Summary cards ── -->
+    <div class="reports-summary">
+      <div class="reports-summary__card reports-summary__card--income">
+        <div class="reports-summary__icon"><i class="ri-arrow-up-circle-fill"></i></div>
+        <div>
+          <p>Total Income</p>
+          <h2>&#8377;{{ "%.2f"|format(total_income) }}</h2>
+        </div>
+      </div>
+      <div class="reports-summary__card reports-summary__card--expense">
+        <div class="reports-summary__icon"><i class="ri-arrow-down-circle-fill"></i></div>
+        <div>
+          <p>Total Expenses</p>
+          <h2>&#8377;{{ "%.2f"|format(total_expense) }}</h2>
+        </div>
+      </div>
+      <div class="reports-summary__card reports-summary__card--savings">
+        <div class="reports-summary__icon"><i class="ri-safe-line"></i></div>
+        <div>
+          <p>Net Savings</p>
+          <h2 class="{{ 'text-danger' if net_savings < 0 else 'text-success' }}">
+            &#8377;{{ "%.2f"|format(net_savings) }}
+          </h2>
+        </div>
+      </div>
+      <div class="reports-summary__card reports-summary__card--rate">
+        <div class="reports-summary__icon"><i class="ri-percent-line"></i></div>
+        <div>
+          <p>Savings Rate</p>
+          <h2>{{ savings_rate }}%</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Charts row 1 ── -->
+    <div class="reports-charts-row">
+      <div class="chart-card">
+        <h3><i class="ri-line-chart-line"></i> Income vs Expense Trend</h3>
+        <canvas id="trendChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3><i class="ri-pie-chart-2-line"></i> Expense Breakdown</h3>
+        <canvas id="expensePieChart"></canvas>
+      </div>
+    </div>
+
+    <!-- ── Charts row 2 ── -->
+    <div class="reports-charts-row">
+      <div class="chart-card">
+        <h3><i class="ri-bar-chart-2-line"></i> Monthly Overview (Last 12 Months)</h3>
+        <canvas id="monthlyBarChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3><i class="ri-pie-chart-line"></i> Income Sources</h3>
+        <canvas id="incomePieChart"></canvas>
+      </div>
+    </div>
+
+    <!-- ── Top transactions ── -->
+    <div class="reports-section">
+      <h3><i class="ri-trophy-line"></i> Top 5 Transactions</h3>
+      <div class="top-tx-list">
+        {% if not top_tx %}
+          <p class="reports-empty">No transactions in this period.</p>
+        {% else %}
+          {% for tx in top_tx %}
+          <div class="top-tx-item">
+            <div class="top-tx-item__icon top-tx-icon--{{ tx.type }}">
+              <i class="ri-{{ 'arrow-up' if tx.type == 'income' else 'arrow-down' }}-circle-fill"></i>
+            </div>
+            <div class="top-tx-item__body">
+              <span class="top-tx-category">{{ tx.category }}</span>
+              <span class="top-tx-desc">{{ tx.description or '—' }}</span>
+              <span class="top-tx-date">{{ tx.date.strftime('%b %d, %Y') }}</span>
+            </div>
+            <div class="top-tx-amount top-tx-amount--{{ tx.type }}">
+              {{ '+' if tx.type == 'income' else '-' }}&#8377;{{ "%.2f"|format(tx.amount) }}
+            </div>
+          </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Pass data to JS -->
+<script>
+  const DAILY_ROWS      = {{ daily_rows      | tojson }};
+  const EXPENSE_BY_CAT  = {{ expense_by_cat  | tojson }};
+  const INCOME_BY_CAT   = {{ income_by_cat   | tojson }};
+  const MONTHLY_DATA    = {{ monthly         | tojson }};
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='reports.js') }}"></script>
+{% endblock %}

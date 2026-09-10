@@ -1,0 +1,143 @@
+﻿{% extends "base.html" %}
+{% block title %}Register — Dhan Flow{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}" />
+{% endblock %}
+
+{% block body %}
+<button class="auth-theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <i class="ri-moon-line" id="themeIcon"></i>
+</button>
+
+<div class="auth-wrapper">
+
+  <!-- Left panel -->
+  <div class="auth-panel auth-panel--left">
+    <a href="/" class="auth-logo">
+      <i class="ri-line-chart-fill"></i>
+      DhanFlow - Personal Income &amp; Expense Tracker
+    </a>
+    <div class="auth-panel__content">
+      <h2>Start your financial journey today</h2>
+      <p>Join thousands of users who track smarter and save more every month.</p>
+      <ul class="auth-perks">
+        <li><i class="ri-check-double-line"></i> Free forever — no credit card needed</li>
+        <li><i class="ri-check-double-line"></i> Secure &amp; private data storage</li>
+        <li><i class="ri-check-double-line"></i> Visual reports &amp; budget planning</li>
+        <li><i class="ri-check-double-line"></i> Works on all devices</li>
+      </ul>
+    </div>
+    <div class="auth-panel__decoration" aria-hidden="true">
+      <div class="deco-circle deco-circle--1"></div>
+      <div class="deco-circle deco-circle--2"></div>
+    </div>
+  </div>
+
+  <!-- Right panel -->
+  <div class="auth-panel auth-panel--right">
+    <div class="auth-card">
+      <div class="auth-card__header">
+        <h1>Create Account</h1>
+        <p>Fill in the details below to get started</p>
+      </div>
+
+      {% if success %}
+      <div class="auth-alert auth-alert--success">
+        <i class="ri-checkbox-circle-line"></i>
+        {{ success }}
+        <a href="{{ url_for('auth.login') }}">Go to Login →</a>
+      </div>
+      {% endif %}
+
+      {% if errors %}
+      <div class="auth-alert auth-alert--error">
+        <i class="ri-error-warning-line"></i>
+        <ul>
+          {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form" id="registerForm" novalidate>
+
+        <div class="form__group">
+          <label for="full_name">Full Name</label>
+          <div class="input-wrap">
+            <i class="ri-user-line input-icon"></i>
+            <input type="text" id="full_name" name="full_name"
+                   placeholder="John Doe"
+                   value="{{ old.full_name }}"
+                   pattern="[a-zA-Z\s\-']+"
+                   title="Full name can only contain letters, spaces, hyphens, and apostrophes"
+                   required autocomplete="name" />
+          </div>
+          <small class="form__hint">Letters, spaces, hyphens, and apostrophes only (no numbers)</small>
+        </div>
+
+        <div class="form__group">
+          <label for="email">Email Address</label>
+          <div class="input-wrap">
+            <i class="ri-mail-line input-icon"></i>
+            <input type="email" id="email" name="email"
+                   placeholder="you@example.com"
+                   value="{{ old.email }}"
+                   required autocomplete="email" />
+          </div>
+        </div>
+
+        <div class="form__group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <i class="ri-lock-line input-icon"></i>
+            <input type="password" id="password" name="password"
+                   placeholder="Min. 8 characters"
+                   required autocomplete="new-password" />
+            <button type="button" class="toggle-pw" data-target="password" aria-label="Show password">
+              <i class="ri-eye-line"></i>
+            </button>
+          </div>
+          <div class="pw-strength" id="pwStrength">
+            <div class="pw-strength__bar" id="pwBar"></div>
+          </div>
+          <span class="pw-strength__label" id="pwLabel"></span>
+        </div>
+
+        <div class="form__group">
+          <label for="confirm">Confirm Password</label>
+          <div class="input-wrap">
+            <i class="ri-lock-2-line input-icon"></i>
+            <input type="password" id="confirm" name="confirm"
+                   placeholder="Repeat your password"
+                   required autocomplete="new-password" />
+            <button type="button" class="toggle-pw" data-target="confirm" aria-label="Show password">
+              <i class="ri-eye-line"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form__group form__group--checkbox">
+          <label class="checkbox-label">
+            <input type="checkbox" name="terms" id="terms" required />
+            <span class="checkmark"></span>
+            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--lg btn--full">
+          Create Account <i class="ri-arrow-right-line"></i>
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a>
+      </p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='auth.js') }}"></script>
+{% endblock %}

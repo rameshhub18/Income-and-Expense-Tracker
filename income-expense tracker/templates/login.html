@@ -1,0 +1,110 @@
+﻿{% extends "base.html" %}
+{% block title %}Login — Dhan Flow{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}" />
+{% endblock %}
+
+{% block body %}
+<button class="auth-theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <i class="ri-moon-line" id="themeIcon"></i>
+</button>
+
+<div class="auth-wrapper">
+
+  <!-- Left panel -->
+  <div class="auth-panel auth-panel--left">
+    <a href="/" class="auth-logo">
+      <i class="ri-line-chart-fill"></i>
+      DhanFlow - Personal Income &amp; Expense Tracker
+    </a>
+    <div class="auth-panel__content">
+      <h2>Welcome back!</h2>
+      <p>Sign in to continue managing your finances and tracking your progress.</p>
+      <div class="auth-mini-stats">
+        <div class="mini-stat"><span>12K+</span><p>Users</p></div>
+        <div class="mini-stat"><span>500K+</span><p>Transactions</p></div>
+        <div class="mini-stat"><span>98%</span><p>Satisfaction</p></div>
+      </div>
+    </div>
+    <div class="auth-panel__decoration" aria-hidden="true">
+      <div class="deco-circle deco-circle--1"></div>
+      <div class="deco-circle deco-circle--2"></div>
+    </div>
+  </div>
+
+  <!-- Right panel -->
+  <div class="auth-panel auth-panel--right">
+    <div class="auth-card">
+      <div class="auth-card__header">
+        <h1>Sign In</h1>
+        <p>Enter your credentials to access your dashboard</p>
+      </div>
+
+      {% if error %}
+      <div class="auth-alert auth-alert--error">
+        <i class="ri-error-warning-line"></i>
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form" id="loginForm" novalidate autocomplete="off">
+
+        <div class="form__group">
+          <label for="email">Email Address</label>
+          <div class="input-wrap">
+            <i class="ri-mail-line input-icon"></i>
+            <input type="email" id="email" name="email"
+                   placeholder="you@example.com"
+                   required autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="form__group">
+          <div class="label-row">
+            <label for="password">Password</label>
+            <a href="#" class="forgot-link">Forgot password?</a>
+          </div>
+          <div class="input-wrap">
+            <i class="ri-lock-line input-icon"></i>
+            <input type="password" id="password" name="password"
+                   placeholder="Your password"
+                   required autocomplete="off" />
+            <button type="button" class="toggle-pw" data-target="password" aria-label="Show password">
+              <i class="ri-eye-line"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form__group form__group--checkbox">
+          <label class="checkbox-label">
+            <input type="checkbox" name="remember" id="remember" />
+            <span class="checkmark"></span>
+            Remember me for 30 days
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--lg btn--full">
+          Sign In <i class="ri-arrow-right-line"></i>
+        </button>
+      </form>
+
+      <div class="auth-divider"><span>or continue with</span></div>
+
+      <div class="social-btns">
+        <button class="social-btn" type="button"><i class="ri-google-fill"></i> Google</button>
+        <button class="social-btn" type="button"><i class="ri-github-fill"></i> GitHub</button>
+      </div>
+
+      <p class="auth-switch">
+        Don't have an account? <a href="{{ url_for('auth.register') }}">Sign up free</a>
+      </p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='auth.js') }}"></script>
+{% endblock %}

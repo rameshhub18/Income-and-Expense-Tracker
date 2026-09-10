@@ -1,0 +1,210 @@
+﻿{% extends "base.html" %}
+{% block title %}Categories — Dhan Flow{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='categories.css') }}" />
+{% endblock %}
+
+{% block body %}
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar__header">
+    <a href="/" class="sidebar__logo">
+      <i class="ri-line-chart-fill"></i><span>Dhan Flow</span>
+    </a>
+    <button class="sidebar__close" id="sidebarClose" aria-label="Close sidebar">
+      <i class="ri-close-line"></i>
+    </button>
+  </div>
+  <nav class="sidebar__nav">
+    <a href="{{ url_for('dashboard.dashboard') }}"              class="sidebar__link"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
+    <a href="{{ url_for('dashboard.dashboard') }}?add=income"  class="sidebar__link"><i class="ri-add-circle-line"></i><span>Add Income</span></a>
+    <a href="{{ url_for('dashboard.dashboard') }}?add=expense" class="sidebar__link"><i class="ri-subtract-line"></i><span>Add Expense</span></a>
+    <a href="{{ url_for('categories.categories_page') }}"        class="sidebar__link active"><i class="ri-price-tag-3-line"></i><span>Categories</span></a>
+    <a href="{{ url_for('budget.budget_page') }}"                class="sidebar__link"><i class="ri-wallet-3-line"></i><span>Budget</span></a>
+    <a href="{{ url_for('reports.reports_page') }}"              class="sidebar__link"><i class="ri-bar-chart-2-line"></i><span>Reports</span></a>
+    <a href="{{ url_for('notifications.notifications_page') }}"  class="sidebar__link"><i class="ri-notification-3-line"></i><span>Notifications</span></a>
+    <a href="{{ url_for('backup.backup_page') }}"                class="sidebar__link"><i class="ri-database-2-line"></i><span>Backup</span></a>
+    <a href="{{ url_for('reset.reset_page') }}"                 class="sidebar__link"><i class="ri-refresh-line"></i><span>Reset</span></a>
+  </nav>
+  <div class="sidebar__footer">
+    <a href="{{ url_for('auth.logout') }}" class="sidebar__link sidebar__link--logout">
+      <i class="ri-logout-box-r-line"></i><span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ===== MAIN ===== -->
+<div class="dash-main" id="dashMain">
+
+  <header class="dash-navbar">
+    <div class="dash-navbar__left">
+      <button class="hamburger" id="hamburger" aria-label="Toggle sidebar"><i class="ri-menu-line"></i></button>
+      <h1 class="dash-navbar__title">Categories</h1>
+    </div>
+    <div class="dash-navbar__right">
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+        <i class="ri-moon-line" id="themeIcon"></i>
+      </button>
+      <div class="dash-user">
+        <div class="dash-user__avatar">{{ user_name[0]|upper }}</div>
+        <span class="dash-user__name">Welcome, {{ user_name }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="dash-content">
+
+    <!-- ── Summary strip ── -->
+    <div class="cat-summary">
+      <div class="cat-summary__card">
+        <i class="ri-price-tag-3-line"></i>
+        <div>
+          <span>{{ categories|length }}</span>
+          <p>Total Categories</p>
+        </div>
+      </div>
+      <div class="cat-summary__card cat-summary__card--income">
+        <i class="ri-arrow-up-circle-line"></i>
+        <div>
+          <span>{{ income_cats|length }}</span>
+          <p>Income Categories</p>
+        </div>
+      </div>
+      <div class="cat-summary__card cat-summary__card--expense">
+        <i class="ri-arrow-down-circle-line"></i>
+        <div>
+          <span>{{ expense_cats|length }}</span>
+          <p>Expense Categories</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Toolbar ── -->
+    <div class="cat-toolbar">
+      <div class="dash-search">
+        <i class="ri-search-line"></i>
+        <input type="text" id="catSearch" placeholder="Search categories..." />
+      </div>
+      <div class="cat-filter-btns">
+        <button class="notif-tab active" data-filter="all">All</button>
+        <button class="notif-tab" data-filter="income">Income</button>
+        <button class="notif-tab" data-filter="expense">Expense</button>
+        <button class="notif-tab" data-filter="both">Both</button>
+      </div>
+      <button class="btn btn--primary btn--sm" id="openAddModal">
+        <i class="ri-add-line"></i> Add Category
+      </button>
+    </div>
+
+    <!-- ── Category grid ── -->
+    <div class="cat-grid" id="catGrid">
+      {% for cat in categories %}
+      <div class="cat-card" data-id="{{ cat.id }}" data-type="{{ cat.type }}" data-name="{{ cat.name }}">
+        <div class="cat-card__icon" style="background:{{ cat.color }}22; color:{{ cat.color }}">
+          <i class="{{ cat.icon }}"></i>
+        </div>
+        <div class="cat-card__body">
+          <h4>{{ cat.name }}</h4>
+          <span class="cat-type-badge cat-type-badge--{{ cat.type }}">{{ cat.type|capitalize }}</span>
+        </div>
+        <div class="cat-card__stats">
+          <span><i class="ri-exchange-line"></i> {{ cat.tx_count }} transactions</span>
+          <span><i class="ri-money-dollar-circle-line"></i> &#8377;{{ "%.2f"|format(cat.tx_total) }}</span>
+        </div>
+        <div class="cat-card__actions">
+          <button class="icon-btn edit-cat-btn"
+                  data-id="{{ cat.id }}"
+                  data-name="{{ cat.name }}"
+                  data-type="{{ cat.type }}"
+                  data-icon="{{ cat.icon }}"
+                  data-color="{{ cat.color }}"
+                  title="Edit">
+            <i class="ri-edit-line"></i>
+          </button>
+          <button class="icon-btn delete-cat-btn" data-id="{{ cat.id }}" title="Delete">
+            <i class="ri-delete-bin-line"></i>
+          </button>
+        </div>
+      </div>
+      {% else %}
+      <p class="cat-empty" id="catEmpty">No categories yet.</p>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== ADD / EDIT MODAL ===== -->
+<div class="modal-overlay" id="catModalOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="catModalTitle">
+    <div class="modal__header">
+      <h2 id="catModalTitle">Add Category</h2>
+      <button class="modal__close" id="catModalClose" aria-label="Close"><i class="ri-close-line"></i></button>
+    </div>
+    <form class="modal__form" id="catForm">
+      <input type="hidden" id="catFormAction" value="add" />
+      <input type="hidden" id="catFormId"     value="" />
+
+      <div class="form__group">
+        <label for="catName">Category Name</label>
+        <input type="text" id="catName" class="modal-input" placeholder="e.g. Groceries" required />
+      </div>
+
+      <div class="form__group">
+        <label for="catType">Type</label>
+        <select id="catType">
+          <option value="both">Both</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+      </div>
+
+      <div class="form__group">
+        <label>Color</label>
+        <div class="color-picker" id="colorPicker">
+          {% for c in colors %}
+          <button type="button" class="color-swatch" data-color="{{ c }}"
+                  style="background:{{ c }}" aria-label="{{ c }}"></button>
+          {% endfor %}
+          <input type="color" id="customColor" title="Custom color" />
+        </div>
+        <input type="hidden" id="catColor" value="#2563eb" />
+      </div>
+
+      <div class="form__group">
+        <label>Icon</label>
+        <div class="icon-picker" id="iconPicker">
+          {% for ic in icons %}
+          <button type="button" class="icon-swatch" data-icon="{{ ic }}" aria-label="{{ ic }}">
+            <i class="{{ ic }}"></i>
+          </button>
+          {% endfor %}
+        </div>
+        <input type="hidden" id="catIcon" value="ri-price-tag-3-line" />
+      </div>
+
+      <!-- Live preview -->
+      <div class="cat-preview">
+        <div class="cat-preview__icon" id="previewIcon" style="background:#2563eb22;color:#2563eb">
+          <i class="ri-price-tag-3-line" id="previewIconEl"></i>
+        </div>
+        <span id="previewName">Category Name</span>
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--lg btn--full" id="catSubmitBtn">
+        Add Category <i class="ri-check-line"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='categories.js') }}"></script>
+{% endblock %}

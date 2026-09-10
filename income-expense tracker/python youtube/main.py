@@ -1,0 +1,1 @@
+print("hello myself i stsrt to learn python from youtube on 23 july")

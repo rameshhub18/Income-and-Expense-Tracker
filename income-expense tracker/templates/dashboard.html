@@ -1,0 +1,289 @@
+﻿{% extends "base.html" %}
+{% block title %}Dashboard — Dhan Flow{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block body %}
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar__header">
+    <a href="/" class="sidebar__logo">
+      <i class="ri-line-chart-fill"></i>
+      <span>Dhan Flow</span>
+    </a>
+    <button class="sidebar__close" id="sidebarClose" aria-label="Close sidebar">
+      <i class="ri-close-line"></i>
+    </button>
+  </div>
+  <nav class="sidebar__nav">
+    <a href="{{ url_for('dashboard.dashboard') }}" class="sidebar__link active">
+      <i class="ri-dashboard-line"></i><span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('dashboard.dashboard') }}?add=income" class="sidebar__link" id="addIncomeBtn">
+      <i class="ri-add-circle-line"></i><span>Add Income</span>
+    </a>
+    <a href="{{ url_for('dashboard.dashboard') }}?add=expense" class="sidebar__link" id="addExpenseBtn">
+      <i class="ri-subtract-line"></i><span>Add Expense</span>
+    </a>
+    <a href="{{ url_for('categories.categories_page') }}" class="sidebar__link">
+      <i class="ri-price-tag-3-line"></i><span>Categories</span>
+    </a>
+    <a href="{{ url_for('budget.budget_page') }}" class="sidebar__link">
+      <i class="ri-wallet-3-line"></i><span>Budget</span>
+    </a>
+    <a href="{{ url_for('reports.reports_page') }}" class="sidebar__link">
+      <i class="ri-bar-chart-2-line"></i><span>Reports</span>
+    </a>
+    <a href="{{ url_for('notifications.notifications_page') }}" class="sidebar__link">
+      <i class="ri-notification-3-line"></i><span>Notifications</span>
+    </a>
+    <a href="{{ url_for('backup.backup_page') }}" class="sidebar__link">
+      <i class="ri-database-2-line"></i><span>Backup</span>
+    </a>
+    <a href="{{ url_for('reset.reset_page') }}" class="sidebar__link">
+      <i class="ri-refresh-line"></i><span>Reset</span>
+    </a>
+  </nav>
+  <div class="sidebar__footer">
+    <a href="{{ url_for('auth.logout') }}" class="sidebar__link sidebar__link--logout">
+      <i class="ri-logout-box-r-line"></i><span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ===== MAIN ===== -->
+<div class="dash-main" id="dashMain">
+
+  <header class="dash-navbar">
+    <div class="dash-navbar__left">
+      <button class="hamburger" id="hamburger" aria-label="Toggle sidebar">
+        <i class="ri-menu-line"></i>
+      </button>
+      <h1 class="dash-navbar__title">Dashboard</h1>
+    </div>
+    <div class="dash-navbar__right">
+      <div class="dash-search" id="dashSearch">
+        <i class="ri-search-line"></i>
+        <input type="text" id="searchInput" placeholder="Search transactions..." />
+      </div>
+      <!-- Mobile search toggle -->
+      <button class="icon-btn" id="mobileSearchBtn" aria-label="Search" style="display:none">
+        <i class="ri-search-line"></i>
+      </button>
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+        <i class="ri-moon-line" id="themeIcon"></i>
+      </button>
+      <button class="icon-btn notif-btn" id="notifBtn" aria-label="Notifications"
+              onclick="window.location='{{ url_for('notifications.notifications_page') }}'">
+        <i class="ri-notification-3-line"></i>
+        <span class="notif-badge" id="notifBadge" {% if unread_count == 0 %}style="display:none"{% endif %}>
+          {{ unread_count if unread_count <= 9 else '9+' }}
+        </span>
+      </button>
+      <div class="dash-user">
+        <div class="dash-user__avatar">{{ user_name[0]|upper }}</div>
+        <span class="dash-user__name">Welcome, {{ user_name }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile search bar (drops below navbar) -->
+  <div class="mobile-search-bar" id="mobileSearchBar">
+    <i class="ri-search-line"></i>
+    <input type="text" id="mobileSearchInput" placeholder="Search transactions..." />
+    <button class="icon-btn" id="mobileSearchClose"><i class="ri-close-line"></i></button>
+  </div>
+
+  <div class="dash-content">
+
+    <!-- Summary Cards -->
+    <section class="summary-cards">
+      <div class="summary-card summary-card--income">
+        <div class="summary-card__icon"><i class="ri-arrow-up-circle-fill"></i></div>
+        <div class="summary-card__body">
+          <p>Total Income</p>
+          <h2 class="count-up" data-target="{{ total_income }}">&#8377;0</h2>
+        </div>
+      </div>
+      <div class="summary-card summary-card--expense">
+        <div class="summary-card__icon"><i class="ri-arrow-down-circle-fill"></i></div>
+        <div class="summary-card__body">
+          <p>Total Expenses</p>
+          <h2 class="count-up" data-target="{{ total_expense }}">&#8377;0</h2>
+        </div>
+      </div>
+      <div class="summary-card summary-card--balance">
+        <div class="summary-card__icon"><i class="ri-scales-3-line"></i></div>
+        <div class="summary-card__body">
+          <p>Current Balance</p>
+          <h2 class="count-up" data-target="{{ balance }}">&#8377;0</h2>
+        </div>
+      </div>
+      <div class="summary-card summary-card--budget">
+        <div class="summary-card__icon"><i class="ri-wallet-3-line"></i></div>
+        <div class="summary-card__body">
+          <p>Budget Status</p>
+          <h2>&#8377;{{ "%.2f"|format(total_budget) }}</h2>
+          {% if budget_exceeded %}
+            <span class="budget-exceeded">Budget Exceeded!</span>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="charts-section">
+      <div class="chart-card">
+        <h3><i class="ri-bar-chart-2-line"></i> Monthly Overview</h3>
+        <canvas id="barChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3><i class="ri-pie-chart-2-line"></i> Expense by Category</h3>
+        <canvas id="pieChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="filters-bar">
+      <div class="filter-group">
+        <label>From</label>
+        <input type="date" id="filterFrom" />
+      </div>
+      <div class="filter-group">
+        <label>To</label>
+        <input type="date" id="filterTo" />
+      </div>
+      <div class="filter-group">
+        <label>Type</label>
+        <select id="filterType">
+          <option value="">All</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Category</label>
+        <select id="filterCategory">
+          <option value="">All</option>
+          {% for cat in user_categories %}
+            <option>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button class="btn btn--primary btn--sm" id="applyFilter">Apply</button>
+      <button class="btn btn--outline btn--sm" id="clearFilter">Clear</button>
+      <button class="btn btn--outline btn--sm" id="exportCSV" style="margin-left:auto">
+        <i class="ri-download-line"></i> Export CSV
+      </button>
+    </section>
+
+    <!-- Transactions -->
+    <section class="transactions-section">
+      <div class="transactions-header">
+        <h3>Recent Transactions</h3>
+        <button class="btn btn--primary btn--sm" id="openModalBtn">
+          <i class="ri-add-line"></i> Add Transaction
+        </button>
+      </div>
+      <div class="table-wrap">
+        <table class="tx-table" id="txTable">
+          <thead>
+            <tr>
+              <th>Date</th><th>Type</th><th>Category</th>
+              <th>Description</th><th>Amount</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="txBody">
+            {% if not transactions %}
+              <tr><td colspan="6" class="tx-empty">No transactions yet. Add one!</td></tr>
+            {% else %}
+              {% for tx in transactions %}
+              <tr data-id="{{ tx.id }}" data-type="{{ tx.type }}" data-category="{{ tx.category }}">
+                <td>{{ tx.date.strftime('%b %d, %Y') if tx.date else '' }}</td>
+                <td><span class="tx-badge tx-badge--{{ tx.type }}">{{ tx.type|capitalize }}</span></td>
+                <td>{{ tx.category }}</td>
+                <td>{{ tx.description or '—' }}</td>
+                <td class="tx-amount tx-amount--{{ tx.type }}">
+                  {{ '+' if tx.type == 'income' else '-' }}&#8377;{{ "%.2f"|format(tx.amount) }}
+                </td>
+                <td class="tx-actions">
+                  <button class="icon-btn edit-btn" data-id="{{ tx.id }}" title="Edit"><i class="ri-edit-line"></i></button>
+                  <button class="icon-btn delete-btn" data-id="{{ tx.id }}" title="Delete"><i class="ri-delete-bin-line"></i></button>
+                </td>
+              </tr>
+              {% endfor %}
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal__header">
+      <h2 id="modalTitle">Add Transaction</h2>
+      <button class="modal__close" id="modalClose" aria-label="Close"><i class="ri-close-line"></i></button>
+    </div>
+    <form class="modal__form" id="txForm">
+      <input type="hidden" name="action" id="formAction" value="add" />
+      <input type="hidden" name="tx_id"  id="formTxId"   value="" />
+
+      <div class="form__group">
+        <label for="txAmount">Amount (&#8377;)</label>
+        <input type="number" id="txAmount" name="amount" class="modal-input" placeholder="0.00" step="1000" min="1000" required />
+      </div>
+      <div class="form__group">
+        <label for="txType">Type</label>
+        <select id="txType" name="type" required>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+      </div>
+      <div class="form__group">
+        <label for="txCategory">Category</label>
+        <select id="txCategory" name="category" required>
+          {% for cat in user_categories %}
+            <option value="{{ cat.name }}">{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form__group">
+        <label for="txDate">Date</label>
+        <input type="date" id="txDate" name="date" required />
+      </div>
+      <div class="form__group">
+        <label for="txDesc">Description (optional)</label>
+        <input type="text" id="txDesc" name="description" class="modal-input" placeholder="e.g. Monthly salary" />
+      </div>
+      <button type="submit" class="btn btn--primary btn--lg btn--full" id="txSubmitBtn">
+        Add Transaction <i class="ri-check-line"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+<button class="fab" id="fabBtn" aria-label="Add transaction">
+  <i class="ri-add-line"></i>
+</button>
+
+<!-- Pass data to JS -->
+<script>
+  const MONTHLY_DATA  = {{ monthly_data  | tojson }};
+  const CATEGORY_DATA = {{ cat_data      | tojson }};
+  const API_URL       = "{{ url_for('api.transaction') }}";
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,622 @@
+{% extends "base.html" %}
+{% block title %}Backup & Recovery — Dhan Flow{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}" />
+<style>
+  .backup-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .backup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  .backup-header h1 {
+    font-size: 28px;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .btn-create {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: transform 0.2s;
+  }
+
+  .btn-create:hover {
+    transform: translateY(-2px);
+  }
+
+  .backup-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .stat-card h3 {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin: 0 0 10px 0;
+  }
+
+  .stat-card .value {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text);
+  }
+
+  .backup-section {
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .backup-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+  }
+
+  .backup-tab {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .backup-tab:hover {
+    color: var(--text);
+  }
+
+  .backup-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+
+  .tab-content {
+    display: none;
+    padding: 20px;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  .backup-list {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+
+  .backup-item {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+  }
+
+  .backup-item:hover {
+    background: var(--bg);
+  }
+
+  .backup-info {
+    flex: 1;
+  }
+
+  .backup-filename {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .backup-details {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .backup-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-action {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn-restore {
+    background: #10b981;
+    color: white;
+  }
+
+  .btn-restore:hover {
+    background: #059669;
+  }
+
+  .btn-delete {
+    background: #ef4444;
+    color: white;
+  }
+
+  .btn-delete:hover {
+    background: #dc2626;
+  }
+
+  .empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .empty-state i {
+    font-size: 48px;
+    color: var(--text-muted);
+    opacity: 0.5;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .alert {
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  .alert.success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border-left: 4px solid #10b981;
+    display: block;
+  }
+
+  .alert.error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border-left: 4px solid #ef4444;
+    display: block;
+  }
+
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .history-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text);
+    font-size: 12px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .history-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .history-table tbody tr:hover {
+    background: var(--bg);
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .status-success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+  }
+
+  .status-failed {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+  }
+
+  .action-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .action-backup {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+  }
+
+  .action-restore {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+  }
+
+  .action-delete {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+  }
+
+  .loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar__header">
+    <a href="/" class="sidebar__logo">
+      <i class="ri-line-chart-fill"></i>
+      <span>Dhan Flow</span>
+    </a>
+    <button class="sidebar__close" id="sidebarClose" aria-label="Close sidebar">
+      <i class="ri-close-line"></i>
+    </button>
+  </div>
+  <nav class="sidebar__nav">
+    <a href="{{ url_for('dashboard.dashboard') }}" class="sidebar__link">
+      <i class="ri-dashboard-line"></i><span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('dashboard.dashboard') }}?add=income" class="sidebar__link">
+      <i class="ri-add-circle-line"></i><span>Add Income</span>
+    </a>
+    <a href="{{ url_for('dashboard.dashboard') }}?add=expense" class="sidebar__link">
+      <i class="ri-subtract-line"></i><span>Add Expense</span>
+    </a>
+    <a href="{{ url_for('categories.categories_page') }}" class="sidebar__link">
+      <i class="ri-price-tag-3-line"></i><span>Categories</span>
+    </a>
+    <a href="{{ url_for('budget.budget_page') }}" class="sidebar__link">
+      <i class="ri-wallet-3-line"></i><span>Budget</span>
+    </a>
+    <a href="{{ url_for('reports.reports_page') }}" class="sidebar__link">
+      <i class="ri-bar-chart-2-line"></i><span>Reports</span>
+    </a>
+    <a href="{{ url_for('notifications.notifications_page') }}" class="sidebar__link">
+      <i class="ri-notification-3-line"></i><span>Notifications</span>
+    </a>
+    <a href="{{ url_for('backup.backup_page') }}" class="sidebar__link active">
+      <i class="ri-database-2-line"></i><span>Backup</span>
+    </a>
+    <a href="{{ url_for('reset.reset_page') }}" class="sidebar__link">
+      <i class="ri-refresh-line"></i><span>Reset</span>
+    </a>
+  </nav>
+  <div class="sidebar__footer">
+    <a href="{{ url_for('auth.logout') }}" class="sidebar__link sidebar__link--logout">
+      <i class="ri-logout-box-r-line"></i><span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ===== MAIN ===== -->
+<div class="dash-main" id="dashMain">
+
+  <header class="dash-navbar">
+    <div class="dash-navbar__left">
+      <button class="hamburger" id="hamburger" aria-label="Toggle sidebar">
+        <i class="ri-menu-line"></i>
+      </button>
+      <h1 class="dash-navbar__title">Backup & Recovery</h1>
+    </div>
+    <div class="dash-navbar__right">
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+        <i class="ri-moon-line" id="themeIcon"></i>
+      </button>
+      <div class="dash-user">
+        <div class="dash-user__avatar">{{ user_name[0]|upper }}</div>
+        <span class="dash-user__name">{{ user_name }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="dash-content">
+    <div class="backup-container">
+
+      <!-- Alert -->
+      <div id="alertBox"></div>
+
+      <!-- Header -->
+      <div class="backup-header">
+        <h1>💾 Backup & Recovery</h1>
+        <button class="btn-create" id="createBtn" onclick="createBackup()">
+          <i class="ri-add-line"></i> Create Backup
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="backup-stats">
+        <div class="stat-card">
+          <h3>Total Backups</h3>
+          <div class="value">{{ backups|length }}</div>
+        </div>
+        <div class="stat-card">
+          <h3>Latest Backup</h3>
+          <div class="value">
+            {% if backups %}
+              {{ backups[0].filename.split('_')[3:5]|join(' ') }}
+            {% else %}
+              Never
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Backup Section -->
+      <div class="backup-section">
+        <div class="backup-tabs">
+          <button class="backup-tab active" onclick="switchTab('backups')">
+            <i class="ri-save-line"></i> Backups
+          </button>
+          <button class="backup-tab" onclick="switchTab('history')">
+            <i class="ri-history-line"></i> History
+          </button>
+        </div>
+
+        <!-- Backups Tab -->
+        <div id="backups" class="tab-content active">
+          <div class="backup-list">
+            {% if backups %}
+              {% for backup in backups %}
+              <div class="backup-item">
+                <div class="backup-info">
+                  <div class="backup-filename">
+                    <i class="ri-file-zip-line"></i> {{ backup.filename }}
+                  </div>
+                  <div class="backup-details">
+                    Size: {{ backup.size }}
+                  </div>
+                </div>
+                <div class="backup-actions">
+                  <button class="btn-action btn-restore" onclick="restoreBackup('{{ backup.path }}')">
+                    <i class="ri-refresh-line"></i> Restore
+                  </button>
+                  <button class="btn-action btn-delete" onclick="deleteBackup('{{ backup.path }}')">
+                    <i class="ri-delete-bin-line"></i> Delete
+                  </button>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty-state">
+                <i class="ri-database-2-line"></i>
+                <p>No backups yet. Create your first backup!</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="history" class="tab-content">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 20px;">
+            <h3 style="margin: 0; color: var(--text);">Backup History</h3>
+            <button class="btn-action" style="background: #ef4444; color: white;" onclick="clearHistory()">
+              <i class="ri-delete-bin-line"></i> Clear History
+            </button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Filename</th>
+                  <th>Status</th>
+                  <th>Date & Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if history %}
+                  {% for record in history %}
+                  <tr>
+                    <td>
+                      <span class="action-badge action-{{ record.action }}">
+                        {% if record.action == 'backup' %}
+                          <i class="ri-save-line"></i> Backup
+                        {% elif record.action == 'restore' %}
+                          <i class="ri-refresh-line"></i> Restore
+                        {% else %}
+                          <i class="ri-delete-bin-line"></i> Delete
+                        {% endif %}
+                      </span>
+                    </td>
+                    <td>{{ record.filename }}</td>
+                    <td>
+                      <span class="status-badge status-{{ record.status }}">
+                        {% if record.status == 'success' %}
+                          ✓ Success
+                        {% else %}
+                          ✗ Failed
+                        {% endif %}
+                      </span>
+                    </td>
+                    <td>{{ record.created_at.strftime('%b %d, %Y %I:%M %p') if record.created_at else '—' }}</td>
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="4" style="text-align: center; padding: 40px; color: #9ca3af;">
+                      <i class="ri-history-line" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
+                      No history yet
+                    </td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  function showAlert(message, type = 'success') {
+    const alertBox = document.getElementById('alertBox');
+    alertBox.innerHTML = `<div class="alert ${type}">${message}</div>`;
+    setTimeout(() => {
+      alertBox.innerHTML = '';
+    }, 5000);
+  }
+
+  function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.backup-tab').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(tabName).classList.add('active');
+    event.target.closest('.backup-tab').classList.add('active');
+  }
+
+  function createBackup() {
+    const btn = document.getElementById('createBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading"></span> Creating...';
+
+    fetch('/api/backup/create', {
+      method: 'POST'
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showAlert('✅ Backup created successfully!', 'success');
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        showAlert('❌ ' + (data.message || 'Failed'), 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ri-add-line"></i> Create Backup';
+      }
+    })
+    .catch(e => {
+      showAlert('❌ Error: ' + e.message, 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ri-add-line"></i> Create Backup';
+    });
+  }
+
+  function restoreBackup(backupFile) {
+    if (!confirm('⚠️ This will overwrite your database. Continue?')) return;
+
+    const formData = new FormData();
+    formData.append('backup_file', backupFile);
+
+    fetch('/api/backup/restore', {
+      method: 'POST',
+      body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showAlert('✅ Database restored!', 'success');
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        showAlert('❌ ' + (data.message || 'Failed'), 'error');
+      }
+    })
+    .catch(e => showAlert('❌ Error: ' + e.message, 'error'));
+  }
+
+  function deleteBackup(backupFile) {
+    if (!confirm('Delete this backup?')) return;
+
+    const formData = new FormData();
+    formData.append('backup_file', backupFile);
+
+    fetch('/api/backup/delete', {
+      method: 'POST',
+      body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showAlert('✅ Backup deleted!', 'success');
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        showAlert('❌ ' + (data.message || 'Failed'), 'error');
+      }
+    })
+    .catch(e => showAlert('❌ Error: ' + e.message, 'error'));
+  }
+
+  function clearHistory() {
+    if (!confirm('⚠️ Clear all backup history? This cannot be undone.')) return;
+
+    fetch('/api/backup/clear-history', {
+      method: 'POST'
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showAlert('✅ History cleared!', 'success');
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        showAlert('❌ ' + (data.message || 'Failed'), 'error');
+      }
+    })
+    .catch(e => showAlert('❌ Error: ' + e.message, 'error'));
+  }
+</script>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+{% endblock %}

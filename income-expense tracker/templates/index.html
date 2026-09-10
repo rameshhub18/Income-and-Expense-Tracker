@@ -1,0 +1,518 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dhan Flow — Personal Income &amp; Expense Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<header class="header" id="header">
+  <nav class="nav container">
+    <a href="#home" class="nav__logo">
+      <i class="ri-line-chart-fill nav__logo-icon"></i>
+      Dhan Flow
+    </a>
+    <ul class="nav__menu" id="navMenu">
+      <li><a href="#home"     class="nav__link active">Home</a></li>
+      <li><a href="#features" class="nav__link">Features</a></li>
+      <li><a href="#how"      class="nav__link">How It Works</a></li>
+      <li><a href="#testimonials" class="nav__link">Reviews</a></li>
+      <li><a href="#contact"  class="nav__link">Contact</a></li>
+      <li><a href="{{ url_for('auth.login') }}"    class="btn btn--outline btn--sm">Login</a></li>
+      <li><a href="{{ url_for('auth.register') }}" class="btn btn--primary btn--sm">Get Started</a></li>
+    </ul>
+    <div class="nav__actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="ri-moon-line" id="themeIcon"></i>
+      </button>
+      <button class="nav__hamburger" id="hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero section" id="home">
+  <!-- Animated background blobs -->
+  <div class="hero__blob hero__blob--1" aria-hidden="true"></div>
+  <div class="hero__blob hero__blob--2" aria-hidden="true"></div>
+  <div class="hero__blob hero__blob--3" aria-hidden="true"></div>
+
+  <div class="container hero__grid">
+    <!-- Left: copy -->
+    <div class="hero__content" data-animate="fade-up">
+      <div class="hero__eyebrow">
+        <span class="hero__pill"><i class="ri-sparkling-line"></i> #1 Personal Finance App</span>
+      </div>
+      <h1 class="hero__title">
+        Take Control of<br />
+        Your <span class="hero__gradient-text">Financial Future</span>
+      </h1>
+      <p class="hero__desc">
+        Track income, manage expenses, set budgets, and get beautiful reports —
+        all in one powerful, free dashboard.
+      </p>
+      <div class="hero__cta">
+        <a href="{{ url_for('auth.register') }}" class="btn btn--primary btn--lg hero__cta-main">
+          Start for Free <i class="ri-arrow-right-line"></i>
+        </a>
+        <a href="#how" class="btn btn--ghost btn--lg">
+          <i class="ri-play-circle-line"></i> See How It Works
+        </a>
+      </div>
+      <div class="hero__trust">
+        <div class="hero__avatars">
+          <div class="hero__av" style="background:#6366f1">A</div>
+          <div class="hero__av" style="background:#10b981">B</div>
+          <div class="hero__av" style="background:#f59e0b">C</div>
+          <div class="hero__av" style="background:#ef4444">D</div>
+        </div>
+        <p><strong>12,000+</strong> users already tracking smarter</p>
+      </div>
+    </div>
+
+    <!-- Right: floating dashboard mockup -->
+    <div class="hero__mockup" data-animate="fade-left">
+      <!-- Main card -->
+      <div class="mockup-card mockup-card--main">
+        <div class="mockup-card__header">
+          <div class="mockup-dots">
+            <span class="dot dot--red"></span>
+            <span class="dot dot--yellow"></span>
+            <span class="dot dot--green"></span>
+          </div>
+          <span class="mockup-card__title">Dashboard Overview</span>
+        </div>
+        <div class="mockup-card__body">
+          <div class="mockup-balance">
+            <p>Total Balance</p>
+            <h2>&#8377;4,285.50</h2>
+            <span class="mockup-trend up"><i class="ri-arrow-up-line"></i> +12.4% this month</span>
+          </div>
+          <div class="mockup-bars">
+            <div class="mockup-bar-row">
+              <span>Income</span>
+              <div class="mockup-bar"><div class="mockup-bar-fill income" style="width:75%"></div></div>
+              <span class="mockup-bar-val income-val">&#8377;6,200</span>
+            </div>
+            <div class="mockup-bar-row">
+              <span>Expenses</span>
+              <div class="mockup-bar"><div class="mockup-bar-fill expense" style="width:45%"></div></div>
+              <span class="mockup-bar-val expense-val">&#8377;1,914</span>
+            </div>
+            <div class="mockup-bar-row">
+              <span>Savings</span>
+              <div class="mockup-bar"><div class="mockup-bar-fill savings" style="width:60%"></div></div>
+              <span class="mockup-bar-val savings-val">&#8377;4,285</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating mini cards -->
+      <div class="mockup-float mockup-float--income">
+        <i class="ri-arrow-up-circle-fill"></i>
+        <div>
+          <p>Income</p>
+          <strong>+&#8377;3,500</strong>
+        </div>
+      </div>
+
+      <div class="mockup-float mockup-float--expense">
+        <i class="ri-arrow-down-circle-fill"></i>
+        <div>
+          <p>Expense</p>
+          <strong>-&#8377;800</strong>
+        </div>
+      </div>
+
+      <div class="mockup-float mockup-float--alert">
+        <i class="ri-notification-3-fill"></i>
+        <div>
+          <p>Budget Alert</p>
+          <strong>80% used</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TICKER ===== -->
+<div class="ticker-wrap" aria-hidden="true">
+  <div class="ticker">
+    <span><i class="ri-check-double-line"></i> Free Forever</span>
+    <span><i class="ri-shield-check-line"></i> Bank-Level Security</span>
+    <span><i class="ri-bar-chart-2-line"></i> Real-Time Reports</span>
+    <span><i class="ri-notification-3-line"></i> Smart Alerts</span>
+    <span><i class="ri-device-line"></i> Works on All Devices</span>
+    <span><i class="ri-pie-chart-2-line"></i> Visual Analytics</span>
+    <span><i class="ri-wallet-3-line"></i> Budget Planning</span>
+    <span><i class="ri-exchange-line"></i> Unlimited Transactions</span>
+    <!-- duplicate for seamless loop -->
+    <span><i class="ri-check-double-line"></i> Free Forever</span>
+    <span><i class="ri-shield-check-line"></i> Bank-Level Security</span>
+    <span><i class="ri-bar-chart-2-line"></i> Real-Time Reports</span>
+    <span><i class="ri-notification-3-line"></i> Smart Alerts</span>
+    <span><i class="ri-device-line"></i> Works on All Devices</span>
+    <span><i class="ri-pie-chart-2-line"></i> Visual Analytics</span>
+    <span><i class="ri-wallet-3-line"></i> Budget Planning</span>
+    <span><i class="ri-exchange-line"></i> Unlimited Transactions</span>
+  </div>
+</div>
+
+<!-- ===== STATS STRIP ===== -->
+<section class="stats-strip">
+  <div class="container stats-strip__grid">
+    <div class="stat-item" data-animate="fade-up" data-delay="0">
+      <h3 class="stat-item__num" data-target="12000">0</h3>
+      <p>Active Users</p>
+    </div>
+    <div class="stat-item" data-animate="fade-up" data-delay="100">
+      <h3 class="stat-item__num" data-target="500">0</h3>
+      <p>K+ Transactions</p>
+    </div>
+    <div class="stat-item" data-animate="fade-up" data-delay="200">
+      <h3 class="stat-item__num" data-target="98">0</h3>
+      <p>% Satisfaction</p>
+    </div>
+    <div class="stat-item" data-animate="fade-up" data-delay="300">
+      <h3 class="stat-item__num" data-target="4">0</h3>
+      <p>Min Setup Time</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section class="features section" id="features">
+  <div class="container">
+    <div class="section__header" data-animate="fade-up">
+      <span class="badge">Everything You Need</span>
+      <h2 class="section__title">Powerful Features for <span class="highlight">Smart Money</span></h2>
+      <p class="section__desc">One dashboard. Every financial tool you need to thrive.</p>
+    </div>
+
+    <div class="feat-grid">
+
+      <div class="feat-item feat-item--green" data-animate="fade-up" data-delay="0">
+        <div class="feat-item__top">
+          <div class="feat-item__icon"><i class="ri-money-dollar-circle-line"></i></div>
+          <span class="feat-item__num">01</span>
+        </div>
+        <h3>Income Tracking</h3>
+        <p>Log salary, freelance, investments and every income source. See totals at a glance with beautiful summaries.</p>
+        <div class="feat-item__bar"></div>
+      </div>
+
+      <div class="feat-item feat-item--red" data-animate="fade-up" data-delay="80">
+        <div class="feat-item__top">
+          <div class="feat-item__icon"><i class="ri-shopping-cart-2-line"></i></div>
+          <span class="feat-item__num">02</span>
+        </div>
+        <h3>Expense Management</h3>
+        <p>Categorize every expense and know exactly where your money goes each month.</p>
+        <div class="feat-item__bar"></div>
+      </div>
+
+      <div class="feat-item feat-item--blue" data-animate="fade-up" data-delay="160">
+        <div class="feat-item__top">
+          <div class="feat-item__icon"><i class="ri-wallet-3-line"></i></div>
+          <span class="feat-item__num">03</span>
+        </div>
+        <h3>Budget Planning</h3>
+        <p>Set monthly budgets per category and get alerts before you overspend.</p>
+        <div class="feat-item__bar"></div>
+      </div>
+
+      <div class="feat-item feat-item--purple" data-animate="fade-up" data-delay="240">
+        <div class="feat-item__top">
+          <div class="feat-item__icon"><i class="ri-bar-chart-2-line"></i></div>
+          <span class="feat-item__num">04</span>
+        </div>
+        <h3>Reports &amp; Analytics</h3>
+        <p>Visual charts, trend lines, and detailed breakdowns of your financial health over time.</p>
+        <div class="feat-item__bar"></div>
+      </div>
+
+      <div class="feat-item feat-item--orange" data-animate="fade-up" data-delay="320">
+        <div class="feat-item__top">
+          <div class="feat-item__icon"><i class="ri-notification-3-line"></i></div>
+          <span class="feat-item__num">05</span>
+        </div>
+        <h3>Smart Notifications</h3>
+        <p>Budget exceeded? Bill due? Get instant alerts so you're always in control of your finances.</p>
+        <div class="feat-item__bar"></div>
+      </div>
+
+      <div class="feat-item feat-item--teal" data-animate="fade-up" data-delay="400">
+        <div class="feat-item__top">
+          <div class="feat-item__icon"><i class="ri-shield-check-line"></i></div>
+          <span class="feat-item__num">06</span>
+        </div>
+        <h3>Secure &amp; Private</h3>
+        <p>Your data is encrypted end-to-end and stored securely. Only you have access, always.</p>
+        <div class="feat-item__bar"></div>
+      </div>
+
+      <div class="feat-item feat-item--indigo" data-animate="fade-up" data-delay="480">
+        <div class="feat-item__top">
+          <div class="feat-item__icon"><i class="ri-price-tag-3-line"></i></div>
+          <span class="feat-item__num">07</span>
+        </div>
+        <h3>Custom Categories</h3>
+        <p>Create categories with custom icons and colors to organize your finances your way.</p>
+        <div class="feat-item__bar"></div>
+      </div>
+
+      <div class="feat-item feat-item--green" data-animate="fade-up" data-delay="560">
+        <div class="feat-item__top">
+          <div class="feat-item__icon"><i class="ri-download-line"></i></div>
+          <span class="feat-item__num">08</span>
+        </div>
+        <h3>CSV Export</h3>
+        <p>Download your full transaction history anytime for tax filing or personal records.</p>
+        <div class="feat-item__bar"></div>
+      </div>
+
+      <div class="feat-item feat-item--blue" data-animate="fade-up" data-delay="640">
+        <div class="feat-item__top">
+          <div class="feat-item__icon"><i class="ri-device-line"></i></div>
+          <span class="feat-item__num">09</span>
+        </div>
+        <h3>Works on All Devices</h3>
+        <p>Fully responsive design works perfectly on desktop, tablet, and mobile browsers.</p>
+        <div class="feat-item__bar"></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section class="how section" id="how">
+  <div class="container">
+    <div class="section__header" data-animate="fade-up">
+      <span class="badge">Simple Process</span>
+      <h2 class="section__title">Up and Running in <span class="highlight">4 Steps</span></h2>
+      <p class="section__desc">No setup fees. No credit card. Just sign up and go.</p>
+    </div>
+
+    <div class="how__grid">
+      <div class="how-step" data-animate="fade-up" data-delay="0">
+        <div class="how-step__num">01</div>
+        <div class="how-step__icon"><i class="ri-user-add-line"></i></div>
+        <h3>Create Account</h3>
+        <p>Sign up in under 60 seconds. No credit card required, ever.</p>
+      </div>
+      <div class="how-step__arrow" aria-hidden="true"><i class="ri-arrow-right-line"></i></div>
+      <div class="how-step" data-animate="fade-up" data-delay="150">
+        <div class="how-step__num">02</div>
+        <div class="how-step__icon"><i class="ri-add-circle-line"></i></div>
+        <h3>Add Transactions</h3>
+        <p>Log income and expenses with categories, dates, and notes.</p>
+      </div>
+      <div class="how-step__arrow" aria-hidden="true"><i class="ri-arrow-right-line"></i></div>
+      <div class="how-step" data-animate="fade-up" data-delay="300">
+        <div class="how-step__num">03</div>
+        <div class="how-step__icon"><i class="ri-pie-chart-2-line"></i></div>
+        <h3>View Reports</h3>
+        <p>Explore charts, trends, and summaries of your financial activity.</p>
+      </div>
+      <div class="how-step__arrow" aria-hidden="true"><i class="ri-arrow-right-line"></i></div>
+      <div class="how-step" data-animate="fade-up" data-delay="450">
+        <div class="how-step__num">04</div>
+        <div class="how-step__icon"><i class="ri-trophy-line"></i></div>
+        <h3>Reach Goals</h3>
+        <p>Use insights to cut spending, grow savings, and hit your targets.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TESTIMONIALS ===== -->
+<section class="testimonials section" id="testimonials">
+  <div class="container">
+    <div class="section__header" data-animate="fade-up">
+      <span class="badge">Real People, Real Results</span>
+      <h2 class="section__title">Loved by <span class="highlight">Thousands</span></h2>
+    </div>
+
+    <div class="testimonials__track" id="testimonialsTrack">
+      <div class="testimonial-card" data-animate="fade-up" data-delay="0">
+        <div class="testimonial-card__top">
+          <div class="stars">★★★★★</div>
+          <span class="testimonial-tag">Freelancer</span>
+        </div>
+        <p>"This app completely changed how I manage my money. I finally know where every rupee goes and I've saved more in 3 months than the whole last year!"</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">JD</div>
+          <div>
+            <strong>Jane Doe</strong>
+            <span>Freelance Designer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card" data-animate="fade-up" data-delay="100">
+        <div class="testimonial-card__top">
+          <div class="stars">★★★★★</div>
+          <span class="testimonial-tag">Engineer</span>
+        </div>
+        <p>"The budget planning feature helped me save &#8377;500 in my first month. The reports are incredibly clear and the UI is just beautiful."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:linear-gradient(135deg,#2563eb,#06b6d4)">MS</div>
+          <div>
+            <strong>Mark Smith</strong>
+            <span>Software Engineer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card" data-animate="fade-up" data-delay="200">
+        <div class="testimonial-card__top">
+          <div class="stars">★★★★★</div>
+          <span class="testimonial-tag">Business Owner</span>
+        </div>
+        <p>"Clean interface, easy to use, and the reports are incredibly insightful. I use it for both personal and business finances. Absolutely love it!"</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">AL</div>
+          <div>
+            <strong>Amy Lee</strong>
+            <span>Small Business Owner</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card" data-animate="fade-up" data-delay="300">
+        <div class="testimonial-card__top">
+          <div class="stars">★★★★★</div>
+          <span class="testimonial-tag">Student</span>
+        </div>
+        <p>"As a student on a tight budget, this tool is a lifesaver. The category breakdowns show me exactly where I'm overspending. Highly recommend!"</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">RK</div>
+          <div>
+            <strong>Raj Kumar</strong>
+            <span>University Student</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA BANNER ===== -->
+<section class="cta-banner section" id="cta">
+  <div class="cta-banner__bg" aria-hidden="true">
+    <div class="cta-blob cta-blob--1"></div>
+    <div class="cta-blob cta-blob--2"></div>
+  </div>
+  <div class="container cta-banner__inner" data-animate="fade-up">
+    <div class="cta-banner__text">
+      <h2>Ready to Take Control of Your Finances?</h2>
+      <p>Join 12,000+ users who are already tracking smarter. It's completely free.</p>
+    </div>
+    <div class="cta-banner__actions">
+      <a href="{{ url_for('auth.register') }}" class="btn btn--white btn--lg">
+        Start Tracking Now <i class="ri-arrow-right-line"></i>
+      </a>
+      <a href="{{ url_for('auth.login') }}" class="btn btn--cta-outline btn--lg">
+        Sign In
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section class="contact section" id="contact">
+  <div class="container contact__grid">
+    <div class="contact__info" data-animate="fade-right">
+      <span class="badge">Get In Touch</span>
+      <h2 class="section__title">Have a <span class="highlight">Question?</span></h2>
+      <p>We'd love to hear from you. Send us a message and we'll get back to you as soon as possible.</p>
+      <ul class="contact__details">
+        <li><i class="ri-mail-line"></i> support@dhanflow.app</li>
+        <li><i class="ri-time-line"></i> Mon–Fri, 9am–6pm</li>
+        <li><i class="ri-map-pin-line"></i> Available Worldwide</li>
+      </ul>
+    </div>
+    <form class="contact__form" id="contactForm" data-animate="fade-left">
+      <div class="form__row">
+        <div class="form__group">
+          <label for="cname">Full Name</label>
+          <input type="text" id="cname" placeholder="Your name" required />
+        </div>
+        <div class="form__group">
+          <label for="cemail">Email Address</label>
+          <input type="email" id="cemail" placeholder="your@email.com" required />
+        </div>
+      </div>
+      <div class="form__group">
+        <label for="cmessage">Message</label>
+        <textarea id="cmessage" rows="5" placeholder="Write your message..." required></textarea>
+      </div>
+      <button type="submit" class="btn btn--primary btn--lg">
+        Send Message <i class="ri-send-plane-line"></i>
+      </button>
+      <p class="form__success" id="formSuccess">Message sent! We'll get back to you soon.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container footer__grid">
+    <div class="footer__brand">
+      <a href="#home" class="nav__logo">
+        <i class="ri-line-chart-fill nav__logo-icon"></i> Dhan Flow
+      </a>
+      <p>Simplifying personal finance for everyone, one transaction at a time.</p>
+      <div class="footer__social">
+        <a href="#" aria-label="Facebook"><i class="ri-facebook-fill"></i></a>
+        <a href="#" aria-label="Twitter"><i class="ri-twitter-x-fill"></i></a>
+        <a href="#" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+        <a href="#" aria-label="GitHub"><i class="ri-github-fill"></i></a>
+      </div>
+    </div>
+    <div class="footer__links">
+      <h4>Product</h4>
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How It Works</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+      </ul>
+    </div>
+    <div class="footer__links">
+      <h4>Account</h4>
+      <ul>
+        <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+        <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+        <li><a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a></li>
+      </ul>
+    </div>
+    <div class="footer__links">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer__bottom">
+    <p>&copy; <span id="year"></span> Dhan Flow. All rights reserved.</p>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <i class="ri-arrow-up-line"></i>
+</button>
+
+<script src="{{ url_for('static', filename='landing.js') }}"></script>
+</body>
+</html>

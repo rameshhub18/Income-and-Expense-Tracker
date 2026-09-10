@@ -1,0 +1,316 @@
+﻿{% extends "base.html" %}
+{% block title %}Budget — Dhan Flow{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='budget.css') }}" />
+{% endblock %}
+
+{% block body %}
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar__header">
+    <a href="/" class="sidebar__logo">
+      <i class="ri-line-chart-fill"></i><span>Dhan Flow</span>
+    </a>
+    <button class="sidebar__close" id="sidebarClose" aria-label="Close sidebar">
+      <i class="ri-close-line"></i>
+    </button>
+  </div>
+  <nav class="sidebar__nav">
+    <a href="{{ url_for('dashboard.dashboard') }}"             class="sidebar__link"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
+    <a href="{{ url_for('dashboard.dashboard') }}?add=income"  class="sidebar__link"><i class="ri-add-circle-line"></i><span>Add Income</span></a>
+    <a href="{{ url_for('dashboard.dashboard') }}?add=expense" class="sidebar__link"><i class="ri-subtract-line"></i><span>Add Expense</span></a>
+    <a href="{{ url_for('categories.categories_page') }}"       class="sidebar__link"><i class="ri-price-tag-3-line"></i><span>Categories</span></a>
+    <a href="{{ url_for('budget.budget_page') }}"               class="sidebar__link active"><i class="ri-wallet-3-line"></i><span>Budget</span></a>
+    <a href="{{ url_for('reports.reports_page') }}"             class="sidebar__link"><i class="ri-bar-chart-2-line"></i><span>Reports</span></a>
+    <a href="{{ url_for('notifications.notifications_page') }}" class="sidebar__link"><i class="ri-notification-3-line"></i><span>Notifications</span></a>
+    <a href="{{ url_for('backup.backup_page') }}"               class="sidebar__link"><i class="ri-database-2-line"></i><span>Backup</span></a>
+    <a href="{{ url_for('reset.reset_page') }}"                class="sidebar__link"><i class="ri-refresh-line"></i><span>Reset</span></a>
+  </nav>
+  <div class="sidebar__footer">
+    <a href="{{ url_for('auth.logout') }}" class="sidebar__link sidebar__link--logout">
+      <i class="ri-logout-box-r-line"></i><span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ===== MAIN ===== -->
+<div class="dash-main" id="dashMain">
+
+  <header class="dash-navbar">
+    <div class="dash-navbar__left">
+      <button class="hamburger" id="hamburger" aria-label="Toggle sidebar"><i class="ri-menu-line"></i></button>
+      <h1 class="dash-navbar__title">Budget Planner</h1>
+    </div>
+    <div class="dash-navbar__right">
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+        <i class="ri-moon-line" id="themeIcon"></i>
+      </button>
+      <div class="dash-user">
+        <div class="dash-user__avatar">{{ user_name[0]|upper }}</div>
+        <span class="dash-user__name">Welcome, {{ user_name }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="dash-content">
+
+    <!-- ── Month selector ── -->
+    <div class="budget-month-bar">
+      <div class="budget-month-bar__left">
+        <i class="ri-calendar-line"></i>
+        <select id="monthSelect">
+          {% for m in months %}
+          <option value="{{ m.value }}" {% if m.value == selected_month %}selected{% endif %}>
+            {{ m.label }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <button class="btn btn--primary btn--sm" id="openAddModal">
+        <i class="ri-add-line"></i> Set Budget Goal
+      </button>
+    </div>
+
+    <!-- ── Summary cards ── -->
+    <div class="budget-summary">
+      <div class="budget-summary__card">
+        <div class="budget-summary__icon" style="background:#dbeafe;color:#2563eb">
+          <i class="ri-wallet-3-line"></i>
+        </div>
+        <div>
+          <p>Total Budget</p>
+          <h2>&#8377;{{ "%.2f"|format(total_budget) }}</h2>
+        </div>
+      </div>
+      <div class="budget-summary__card">
+        <div class="budget-summary__icon" style="background:#fee2e2;color:#dc2626">
+          <i class="ri-arrow-down-circle-line"></i>
+        </div>
+        <div>
+          <p>Total Spent</p>
+          <h2>&#8377;{{ "%.2f"|format(total_spent) }}</h2>
+        </div>
+      </div>
+      <div class="budget-summary__card">
+        <div class="budget-summary__icon" style="{% if total_remaining < 0 %}background:#fee2e2;color:#dc2626{% else %}background:#dcfce7;color:#16a34a{% endif %}">
+          <i class="ri-safe-line"></i>
+        </div>
+        <div>
+          <p>Remaining</p>
+          <h2 class="{{ 'text-danger' if total_remaining < 0 else 'text-success' }}">
+            {% if total_remaining < 0 %}
+              &#8377;{{ "%.2f"|format(total_remaining * -1) }}
+              <small style="font-size:.7rem;font-weight:600"> over</small>
+            {% else %}
+              &#8377;{{ "%.2f"|format(total_remaining) }}
+            {% endif %}
+          </h2>
+        </div>
+      </div>
+      <div class="budget-summary__card">
+        <div class="budget-summary__icon" style="background:#fef3c7;color:#d97706">
+          <i class="ri-percent-line"></i>
+        </div>
+        <div>
+          <p>Overall Used</p>
+          <h2 class="{{ 'text-danger' if overall_pct >= 100 else 'text-warning' if overall_pct >= 80 else '' }}">
+            {{ overall_pct }}%
+          </h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Overall progress bar ── -->
+    {% if total_budget > 0 %}
+    <div class="budget-overall-bar">
+      <div class="budget-overall-bar__header">
+        <span class="budget-overall-bar__title">
+          <i class="ri-bar-chart-horizontal-line"></i> Overall Budget Usage
+        </span>
+        <span class="budget-overall-bar__vals">
+          <strong>&#8377;{{ "%.2f"|format(total_spent) }}</strong> spent of
+          <strong>&#8377;{{ "%.2f"|format(total_budget) }}</strong>
+          &nbsp;·&nbsp;
+          {% if total_remaining >= 0 %}
+            <span class="text-success"><strong>&#8377;{{ "%.2f"|format(total_remaining) }}</strong> left</span>
+          {% else %}
+            <span class="text-danger"><strong>&#8377;{{ "%.2f"|format(total_remaining * -1) }}</strong> over budget</span>
+          {% endif %}
+        </span>
+      </div>
+      <div class="progress-track progress-track--lg">
+        <div class="progress-fill progress-fill--{{ 'exceeded' if overall_pct >= 100 else 'warning' if overall_pct >= 80 else 'ok' }}"
+             style="width:{{ overall_pct }}%" data-pct="{{ overall_pct }}"></div>
+      </div>
+      <div class="budget-overall-bar__footer">
+        <span>0%</span>
+        <span class="budget-overall-pct-label">{{ overall_pct }}% used</span>
+        <span>100%</span>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ── Budget cards ── -->
+    {% if not budgets %}
+    <div class="budget-empty">
+      <i class="ri-wallet-3-line"></i>
+      <h3>No budgets set for this month</h3>
+      <p>Set spending goals for each category to track your finances better.</p>
+      <button class="btn btn--primary btn--sm" id="openAddModal2">
+        <i class="ri-add-line"></i> Set Your First Budget Goal
+      </button>
+    </div>
+    {% else %}
+    <div class="budget-grid" id="budgetGrid">
+      {% for b in budgets %}
+      <div class="budget-card budget-card--{{ b.status }}" data-id="{{ b.id }}">
+
+        <div class="budget-card__stripe"></div>
+
+        <div class="budget-card__header">
+          <div class="budget-card__title">
+            <div class="budget-card__dot budget-dot--{{ b.status }}"></div>
+            <h4>{{ b.category }}</h4>
+          </div>
+          <div class="budget-card__badges">
+            {% if b.status == 'exceeded' %}
+              <span class="budget-status-tag budget-status-tag--exceeded"><i class="ri-error-warning-fill"></i> Exceeded</span>
+            {% elif b.status == 'warning' %}
+              <span class="budget-status-tag budget-status-tag--warning"><i class="ri-alert-fill"></i> Near Limit</span>
+            {% else %}
+              <span class="budget-status-tag budget-status-tag--ok"><i class="ri-check-line"></i> On Track</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="budget-card__body">
+          <div class="budget-ring-wrap">
+            <svg class="budget-ring" viewBox="0 0 80 80" aria-hidden="true">
+              <circle class="budget-ring__bg" cx="40" cy="40" r="34" />
+              <circle class="budget-ring__fill budget-ring__fill--{{ b.status }}"
+                      cx="40" cy="40" r="34"
+                      stroke-dasharray="{{ ((b.pct / 100) * 213.6)|round(1) }} 213.6"
+                      stroke-dashoffset="53.4" />
+            </svg>
+            <div class="budget-ring__label">
+              <span class="budget-ring__pct">{{ b.pct }}%</span>
+              <span class="budget-ring__sub">used</span>
+            </div>
+          </div>
+
+          <div class="budget-card__amounts">
+            <div class="budget-amount-row">
+              <span class="budget-amount-dot" style="background:#2563eb"></span>
+              <div>
+                <span class="budget-label">Budget Goal</span>
+                <span class="budget-val">&#8377;{{ "%.2f"|format(b.amount) }}</span>
+              </div>
+            </div>
+            <div class="budget-amount-row">
+              <span class="budget-amount-dot" style="background:#ef4444"></span>
+              <div>
+                <span class="budget-label">Spent So Far</span>
+                <span class="budget-val budget-val--spent">&#8377;{{ "%.2f"|format(b.spent) }}</span>
+              </div>
+            </div>
+            <div class="budget-amount-row">
+              {% if b.remaining < 0 %}
+              <span class="budget-amount-dot" style="background:#ef4444"></span>
+              <div>
+                <span class="budget-label">Over Budget</span>
+                <span class="budget-val text-danger">&#8377;{{ "%.2f"|format(b.remaining * -1) }}</span>
+              </div>
+              {% else %}
+              <span class="budget-amount-dot" style="background:#10b981"></span>
+              <div>
+                <span class="budget-label">Remaining</span>
+                <span class="budget-val text-success">&#8377;{{ "%.2f"|format(b.remaining) }}</span>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="budget-card__progress">
+          <div class="progress-track">
+            <div class="progress-fill progress-fill--{{ b.status }}"
+                 style="width:{{ b.pct }}%" data-pct="{{ b.pct }}"></div>
+          </div>
+          <div class="budget-card__progress-labels">
+            <span>&#8377;0</span>
+            <span class="budget-pct-label">{{ b.real_pct }}% of goal</span>
+            <span>&#8377;{{ "%.0f"|format(b.amount) }}</span>
+          </div>
+        </div>
+
+        <div class="budget-card__footer">
+          <button class="btn btn--outline btn--sm edit-budget-btn"
+                  data-id="{{ b.id }}"
+                  data-category="{{ b.category }}"
+                  data-amount="{{ b.amount }}"
+                  data-month="{{ b.month.strftime('%Y-%m') if b.month and b.month.__class__.__name__ == 'date' else selected_month }}">
+            <i class="ri-edit-line"></i> Edit Goal
+          </button>
+          <button class="btn btn--sm budget-delete-sm delete-budget-btn" data-id="{{ b.id }}">
+            <i class="ri-delete-bin-line"></i>
+          </button>
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="budgetModalOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="budgetModalTitle">
+    <div class="modal__header">
+      <h2 id="budgetModalTitle">Set Budget Goal</h2>
+      <button class="modal__close" id="budgetModalClose" aria-label="Close"><i class="ri-close-line"></i></button>
+    </div>
+    <form class="modal__form" id="budgetForm">
+      <input type="hidden" id="budgetFormAction" value="add" />
+      <input type="hidden" id="budgetFormId"     value="" />
+
+      <div class="form__group">
+        <label for="budgetCategory">Category</label>
+        <select id="budgetCategory" required>
+          {% for cat in categories %}
+          <option value="{{ cat }}" {% if loop.first %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form__group">
+        <label for="budgetAmount">Budget Amount (&#8377;)</label>
+        <input type="number" id="budgetAmount" class="modal-input" placeholder="e.g. 5000" step="0.01" min="1" required />
+      </div>
+
+      <div class="form__group">
+        <label for="budgetMonth">Month</label>
+        <input type="month" id="budgetMonth" value="{{ selected_month }}" required />
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--lg btn--full" id="budgetSubmitBtn">
+        Save Budget Goal <i class="ri-check-line"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const SELECTED_MONTH = "{{ selected_month }}";
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='budget.js') }}"></script>
+{% endblock %}

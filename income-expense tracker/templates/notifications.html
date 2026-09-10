@@ -1,0 +1,157 @@
+﻿{% extends "base.html" %}
+{% block title %}Notifications — Dhan Flow{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='notifications.css') }}" />
+{% endblock %}
+
+{% block body %}
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar__header">
+    <a href="/" class="sidebar__logo">
+      <i class="ri-line-chart-fill"></i>
+      <span>Dhan Flow</span>
+    </a>
+    <button class="sidebar__close" id="sidebarClose" aria-label="Close sidebar">
+      <i class="ri-close-line"></i>
+    </button>
+  </div>
+  <nav class="sidebar__nav">
+    <a href="{{ url_for('dashboard.dashboard') }}" class="sidebar__link">
+      <i class="ri-dashboard-line"></i><span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('dashboard.dashboard') }}?add=income"  class="sidebar__link"><i class="ri-add-circle-line"></i><span>Add Income</span></a>
+    <a href="{{ url_for('dashboard.dashboard') }}?add=expense" class="sidebar__link"><i class="ri-subtract-line"></i><span>Add Expense</span></a>
+    <a href="{{ url_for('categories.categories_page') }}" class="sidebar__link">
+      <i class="ri-price-tag-3-line"></i><span>Categories</span>
+    </a>
+    <a href="{{ url_for('budget.budget_page') }}" class="sidebar__link">
+      <i class="ri-wallet-3-line"></i><span>Budget</span>
+    </a>
+    <a href="{{ url_for('reports.reports_page') }}" class="sidebar__link">
+      <i class="ri-bar-chart-2-line"></i><span>Reports</span>
+    </a>
+    <a href="{{ url_for('notifications.notifications_page') }}" class="sidebar__link active">
+      <i class="ri-notification-3-line"></i><span>Notifications</span>
+    </a>
+    <a href="{{ url_for('backup.backup_page') }}" class="sidebar__link">
+      <i class="ri-database-2-line"></i><span>Backup</span>
+    </a>
+    <a href="{{ url_for('reset.reset_page') }}" class="sidebar__link">
+      <i class="ri-refresh-line"></i><span>Reset</span>
+    </a>
+  </nav>
+  <div class="sidebar__footer">
+    <a href="{{ url_for('auth.logout') }}" class="sidebar__link sidebar__link--logout">
+      <i class="ri-logout-box-r-line"></i><span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ===== MAIN ===== -->
+<div class="dash-main" id="dashMain">
+
+  <header class="dash-navbar">
+    <div class="dash-navbar__left">
+      <button class="hamburger" id="hamburger" aria-label="Toggle sidebar">
+        <i class="ri-menu-line"></i>
+      </button>
+      <h1 class="dash-navbar__title">Notifications</h1>
+    </div>
+    <div class="dash-navbar__right">
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+        <i class="ri-moon-line" id="themeIcon"></i>
+      </button>
+      <div class="dash-user">
+        <div class="dash-user__avatar">{{ user_name[0]|upper }}</div>
+        <span class="dash-user__name">Welcome, {{ user_name }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="dash-content">
+
+    <!-- ── Header row ── -->
+    <div class="notif-page-header">
+      <div class="notif-page-header__left">
+        <h2>All Notifications</h2>
+        <span class="notif-count-badge" id="unreadCount">
+          {{ notifications | selectattr('is_read', 'equalto', False) | list | length }} unread
+        </span>
+      </div>
+      <div class="notif-page-header__right">
+        <button class="btn btn--outline btn--sm" id="markAllRead">
+          <i class="ri-check-double-line"></i> Mark all as read
+        </button>
+        <button class="btn btn--outline btn--sm" id="clearAllBtn">
+          <i class="ri-delete-bin-line"></i> Clear all
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Filter tabs ── -->
+    <div class="notif-tabs">
+      <button class="notif-tab active" data-filter="all">All</button>
+      <button class="notif-tab" data-filter="warning,error">Warnings & Alerts</button>
+      <button class="notif-tab" data-filter="success">Success</button>
+      <button class="notif-tab" data-filter="info">Info</button>
+    </div>
+
+    <!-- ── Notification list ── -->
+    <div class="notif-list" id="notifList">
+      {% if not notifications %}
+        <div class="notif-empty" id="emptyState">
+          <i class="ri-notification-off-line"></i>
+          <p>You're all caught up! No notifications.</p>
+        </div>
+      {% else %}
+        {% for n in notifications %}
+        <div class="notif-item {% if not n.is_read %}notif-item--unread{% endif %}"
+             data-id="{{ n.id }}"
+             data-type="{{ n.type }}">
+          <div class="notif-item__icon notif-icon--{{ n.type }}">
+            {% if n.type == 'warning' %}
+              <i class="ri-error-warning-line"></i>
+            {% elif n.type == 'error' %}
+              <i class="ri-alert-line"></i>
+            {% elif n.type == 'success' %}
+              <i class="ri-checkbox-circle-line"></i>
+            {% elif n.type == 'info' %}
+              <i class="ri-information-line"></i>
+            {% else %}
+              <i class="ri-notification-3-line"></i>
+            {% endif %}
+          </div>
+          <div class="notif-item__body">
+            <p class="notif-item__title">{{ n.title }}</p>
+            <p class="notif-item__message">{{ n.message }}</p>
+            <span class="notif-item__time">{{ n.created_at.strftime('%b %d, %Y · %I:%M %p') }}</span>
+          </div>
+          <div class="notif-item__actions">
+            {% if not n.is_read %}
+            <button class="notif-action-btn read-btn" data-id="{{ n.id }}" title="Mark as read">
+              <i class="ri-check-line"></i>
+            </button>
+            {% endif %}
+            <button class="notif-action-btn dismiss-btn" data-id="{{ n.id }}" title="Dismiss">
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='notifications.js') }}"></script>
+{% endblock %}

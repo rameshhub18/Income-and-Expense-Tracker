@@ -1,0 +1,263 @@
+/* =============================================
+   CATEGORIES PAGE — categories.css
+   ============================================= */
+
+/* ── Summary strip ───────────────────────────── */
+.cat-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.cat-summary__card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform .2s, box-shadow .2s;
+}
+
+.cat-summary__card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+.cat-summary__card > i {
+  font-size: 1.75rem;
+  width: 48px; height: 48px;
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--primary-light);
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.cat-summary__card--income > i { background: #dcfce7; color: #16a34a; }
+.cat-summary__card--expense > i { background: #fee2e2; color: #dc2626; }
+
+[data-theme="dark"] .cat-summary__card > i         { background: rgba(37,99,235,.15); }
+[data-theme="dark"] .cat-summary__card--income > i  { background: rgba(22,163,74,.15); }
+[data-theme="dark"] .cat-summary__card--expense > i { background: rgba(220,38,38,.15); }
+
+.cat-summary__card span {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text);
+  display: block;
+}
+
+.cat-summary__card p {
+  font-size: .8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ── Toolbar ─────────────────────────────────── */
+.cat-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.cat-filter-btns {
+  display: flex;
+  gap: .4rem;
+  flex-wrap: wrap;
+}
+
+/* reuse .notif-tab from notifications.css */
+
+/* ── Category grid ───────────────────────────── */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+/* ── Category card ───────────────────────────── */
+.cat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform .2s, box-shadow .2s;
+  position: relative;
+}
+
+.cat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+
+.cat-card__icon {
+  width: 52px; height: 52px;
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+}
+
+.cat-card__body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+.cat-card__body h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.cat-type-badge {
+  font-size: .7rem;
+  font-weight: 700;
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  text-transform: capitalize;
+}
+
+.cat-type-badge--income  { background: #dcfce7; color: #16a34a; }
+.cat-type-badge--expense { background: #fee2e2; color: #dc2626; }
+.cat-type-badge--both    { background: #dbeafe; color: #2563eb; }
+
+[data-theme="dark"] .cat-type-badge--income  { background: rgba(22,163,74,.15); }
+[data-theme="dark"] .cat-type-badge--expense { background: rgba(220,38,38,.15); }
+[data-theme="dark"] .cat-type-badge--both    { background: rgba(37,99,235,.15); }
+
+.cat-card__stats {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  font-size: .8rem;
+  color: var(--text-muted);
+}
+
+.cat-card__stats span {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+}
+
+.cat-card__actions {
+  display: flex;
+  gap: .4rem;
+  justify-content: flex-end;
+}
+
+.cat-card__actions .delete-cat-btn:hover { color: #ef4444; border-color: #ef4444; }
+.cat-card__actions .edit-cat-btn:hover   { color: var(--primary); border-color: var(--primary); }
+
+/* ── Empty state ─────────────────────────────── */
+.cat-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-muted);
+  padding: 3rem;
+  font-size: .95rem;
+}
+
+/* ── Color picker ────────────────────────────── */
+.color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: center;
+}
+
+.color-swatch {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform .15s, border-color .15s;
+}
+
+.color-swatch:hover { transform: scale(1.2); }
+.color-swatch.selected { border-color: var(--text); transform: scale(1.15); }
+
+#customColor {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  padding: 0;
+  cursor: pointer;
+  background: none;
+}
+
+/* ── Icon picker ─────────────────────────────── */
+.icon-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.icon-swatch {
+  width: 36px; height: 36px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.icon-swatch:hover { border-color: var(--primary); color: var(--primary); }
+.icon-swatch.selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* ── Live preview ────────────────────────────── */
+.cat-preview {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  padding: .85rem 1rem;
+  background: var(--bg);
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+.cat-preview__icon {
+  width: 44px; height: 44px;
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+  transition: all .2s;
+}
+
+.cat-preview span {
+  font-weight: 700;
+  color: var(--text);
+  font-size: .95rem;
+}
+
+/* ── Fade-out on delete ──────────────────────── */
+.cat-card.removing {
+  opacity: 0;
+  transform: scale(.9);
+  transition: opacity .3s, transform .3s;
+  pointer-events: none;
+}
+
+/* ── Responsive ──────────────────────────────── */
+@media (max-width: 900px) {
+  .cat-summary { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .cat-summary { grid-template-columns: 1fr; }
+  .cat-toolbar { flex-direction: column; align-items: stretch; }
+}
